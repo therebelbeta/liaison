@@ -55,6 +55,7 @@
     "superagent": "^0.20.0",
     "unirest": "^0.2.7",
     "vinyl-source-stream": "^1.0.0",
+    "vue": "^0.10.6",
     "yargs": "^1.3.2"
   }
 }

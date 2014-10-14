@@ -12,19 +12,11 @@ var minifyCss = require('gulp-minify-css');
 var minifyHtml = require('gulp-minify-html');
 var nodemon = require('gulp-nodemon');
 var rename = require('gulp-rename');
-var clean = require('gulp-rimraf');
 var sass = require('gulp-sass');
 var source = require('vinyl-source-stream');
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var yargs = require('yargs');
-
-gulp.task('clean', function() {
-  return gulp.src('./server/public/*', {
-      read: false
-    })
-    .pipe(clean());
-});
 
 gulp.task('browserify', ['jshint-client'], function() {
   return browserify('./client/js/app.js')
@@ -89,20 +81,20 @@ gulp.task('uglify', ['browserify'], function() {
 gulp.task('assets', function() {
   gulp.src('./client/fonts/**/*')
     .pipe(gulp.dest('./server/public/fonts/'))
+  gulp.src('./client/img/**/*')
+    .pipe(gulp.dest('./server/public/img/'))
+  gulp.src('./client/misc/**/*')
+    .pipe(gulp.dest('./server/public/misc/'))
 });
 
 gulp.task('watch', function() {
-  gulp.watch('./client/js/**/*.js', ['jshint-client',
-    'browserify'
+  gulp.watch('client/js/**/*.js', ['jshint-client', 'browserify']);
+  gulp.watch(['server/**/*.js', '!server/public/**'], ['jshint-server']);
+  gulp.watch('client/sass/**/*.scss', ['sass']);
+  gulp.watch('client/html/**/*.html', ['minifyHTML']);
+  gulp.watch(['client/fonts/**/*', 'client/img/**/*', 'client/misc/**/*'], [
+    'assets'
   ]);
-  gulp.watch(['./server/**/*.js', '!./server/public/**'], [
-    'jshint-server'
-  ]);
-  gulp.watch('./client/sass/**/*.scss', ['sass']);
-  gulp.watch('./client/html/**/*.html', ['minifyHTML']);
-  gulp.watch(['./client/fonts/**/*', './client/img/**/*',
-    './client/misc/**/*'
-  ], ['assets']);
 })
 
 gulp.task('nodemon', function() {
@@ -126,7 +118,7 @@ gulp.task('nodemon', function() {
 
 });
 
-gulp.task('default', ['clean', 'jshint-server', 'browserify', 'sass',
+gulp.task('default', ['jshint-server', 'browserify', 'sass',
   'minifyHTML', 'assets'
 ]);
 gulp.task('deploy', []);
