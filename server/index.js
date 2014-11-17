@@ -1,31 +1,47 @@
-var debug = require('debug');
-var lodash = require('lodash');
-var progress = require('progress');
-var restify = require('restify');
-var unirest = require('unirest');
-var yargs = require('yargs');
+var express = require('express');
+var path = require('path');
+var favicon = require('static-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
-function respond(req, res, next) {
-  res.send('hello ' + req.params.name);
-  next();
-}
+// var routes = require('./routes/index');
+// var users = require('./routes/users');
 
-var server = restify.createServer();
+var app = express();
+var port = process.env.PORT || 8080;
 
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.authorizationParser());
-server.use(restify.dateParser());
-server.use(restify.queryParser());
-server.use(restify.jsonp());
-server.use(restify.gzipResponse());
-server.use(restify.bodyParser());
+var controllers = require('./controllers');
 
-server.get('/api/:name', respond);
-server.head('/api/:name', respond);
-server.get(/\/?.*/, restify.serveStatic({
-  directory: './server/public',
-  default: 'index.html'
-}));
-server.listen(3210, function() {
-  console.log('%s listening at %s', server.name, server.url);
+app.use(favicon());
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cookieParser());
+
+app.use(express.static(__dirname + '/public'));
+
+app.get('/api', controllers.getApi);
+
+app.get('*', function(request, response) {
+  response.sendfile(__dirname + '/public/index.html');
 });
+
+app.listen(port);
+console.log("server started on port " + port);
+
+// var models_path = __dirname + '/server/models';
+// var walk = function(path) {
+//   fs.readdirSync(path).forEach(function(file) {
+//     var newPath = path + '/' + file;
+//     var stat = fs.statSync(newPath);
+//     if (stat.isFile()) {
+//       if (/(.*)\.js$/.test(file)) {
+//         require(newPath);
+//       }
+//     }
+//     else if (stat.isDirectory()) {
+//       walk(newPath);
+//     }
+//   });
+// };
